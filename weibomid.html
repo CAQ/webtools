@@ -1,0 +1,118 @@
+<html>
+<head>
+<title>Weibo mid &lt;=&gt; string</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript">
+var toRadix = function (N, radix) {
+// http://www.javascripter.net/faq/convert3.htm
+  var HexN = "", Q = Math.floor(Math.abs(N)), R;
+  while (true) {
+    R = Q % radix;
+    HexN = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(R) + HexN;
+    Q = (Q - R) / radix;
+    if (Q == 0) break;
+  }
+  return ((N < 0) ? "-" + HexN : HexN);
+};
+
+var toBase = function (num, base, fromBase) {
+// http://forums.devnetwork.net/viewtopic.php?f=13&t=77205
+  var symbolSheet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/".split("");
+  if (typeof fromBase != "undefined") {
+    var decimal = 0;
+    for (var i = 0; i < num.toString().length; i++) {
+      decimal = decimal + (Math.pow(fromBase, i) * symbolSheet.toString().replace(',', '', 'g').indexOf(num.toString().charAt(num.toString().length - (i + 1))));
+    }
+  } else {
+    var decimal = num;
+  }
+  var conversion = "";
+  if (base > symbolSheet.length || base <= 1) {
+    return false;
+  }
+  while (decimal >= 1) {
+    conversion = symbolSheet[(decimal - (base * Math.floor(decimal / base)))] + conversion;
+    decimal = Math.floor(decimal / base);
+  }
+  return (base < 11) ? parseInt(conversion) : conversion;
+};
+
+var mid2str = function() {
+  var mid = $('mid').value;
+  var str = '';
+  while (mid.length > 0) {
+    if (mid.length < 7)
+      var num = parseInt(mid);
+    else
+      var num = parseInt(mid.slice(-7), 10);
+    str = toRadix(num, 62) + str;
+    if (mid.length >= 7)
+      mid = mid.slice(0, mid.length - 7);
+    else
+      break;
+  }
+  $('str').value = str;
+};
+
+var str2mid = function() {
+  var str = $('str').value;
+  var mid = '';
+  while (str.length > 0) {
+    if (str.length < 4)
+      var thisstr = str;
+    else
+      thisstr = str.slice(-4);
+    mid = toBase(thisstr, 10, 62) + mid;
+    if (str.length >= 4)
+      str = str.slice(0, str.length - 4);
+    else
+      break;
+  }
+  $('mid').value = mid;
+};
+
+var base10to62 = function() {
+  var b10 = $('base10').value;
+  $('base62').value = toRadix(b10, 62);
+}
+
+var base62to10 = function() {
+  var b62 = $('base62').value;
+  $('base10').value = toBase(b62, 10, 62);
+}
+
+var $ = function(id) {
+  return document.getElementById(id);
+};
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body>
+Please input in either box: <br/>
+mid (number):
+<input type='text' id='mid' onkeyup='mid2str();' />
+string:
+<input type='text' id='str' onkeyup='str2mid();' />
+<hr/>
+base10 number:
+<input type='text' id='base10' onkeyup='base10to62();' />
+base62 string:
+<input type='text' id='base62' onkeyup='base62to10();' />
+<hr/>
+<p>&copy;CAQ v0.1 2011/12</p>
+</body>
+</html>

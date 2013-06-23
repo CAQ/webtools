@@ -1,0 +1,347 @@
+<html>
+<head>
+<title>Unicode/UTF-8-character table</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style type="text/css">
+table {border: 1px solid; border-collapse: collapse;}
+td, th {border: 1px solid; text-align: center; vertical-align: middle;}
+</style>
+<script type="text/javascript">
+var perpage = 128;
+var startpos = 0;
+
+var changeBlock = function(val) {
+	startpos = parseInt(val);
+	update();
+};
+
+var changePerpage = function(val) {
+	perpage = parseInt(val);
+	update();
+};
+
+var dec2Hex = function(num, len) {
+	var s = num.toString(16);
+	if (len == null)
+		return s;
+	while (s.length < len)
+		s = "0" + s;
+	return s;
+};
+
+var nav = function(stpos) {
+	startpos = stpos;
+	update();
+};
+
+var navBar = function() {
+	var s = "<p>";
+	var prevstart = startpos - perpage;
+	if (prevstart < 0)
+		prevstart = 0;
+	var nextstart = startpos + perpage;
+	if (nextstart > 1114112 - perpage)
+		nextstart = 1114112 - perpage;
+	if (startpos > 0)
+		s += "<a href='#' onclick='nav(" + prevstart + ");'>Previous page(U+" + dec2Hex(prevstart, 4) + " ... U+" + dec2Hex(prevstart + perpage - 1, 4) + ")</a> ";
+	if (startpos + perpage < 1114112)
+		s += "<a href='#' onclick='nav(" + nextstart + ");'>Next page(U+" + dec2Hex(nextstart, 4) + " ... U+" + dec2Hex(nextstart + perpage - 1, 4) + ")</a>";
+	s += "</p>";
+	return s;
+};
+
+var update = function() {
+	$("block").value = startpos;
+	for (var i = 128; i <= 1024; i+=i)
+		$("pp" + i).checked = (perpage == i);
+	$("table").innerHTML = "";
+	var str = "<h2>Displaying U+" + dec2Hex(startpos, 4) + " to U+" + dec2Hex(startpos + perpage - 1, 4) + "</h2>";
+	str += navBar();
+	str += "<table><tr><th>Unicode code point</th><th>character</th><th>UTF-8 (hex.)</th></tr>";
+	for (var num = startpos; num < startpos + perpage; num++) {
+		var hexnum = dec2Hex(num), hexnum4 = dec2Hex(hexnum, 4);
+		var utf8str = "";
+		if (num <= 0x007f)
+			utf8str = dec2Hex(num, 2);
+		else if (num <= 0x07ff) {
+			var y = num >> 6;
+			var x = (num & 0x003f);
+			utf8str = dec2Hex(y + 0x00c0) + " " + dec2Hex(x + 0x0080);
+		} else if (num <= 0xffff) {
+			var z = num >> 12;
+			var y = (num & 0x0fff) >> 6;
+			var x = (num & 0x003f);
+			utf8str = dec2Hex(z + 0x00e0) + " " + dec2Hex(y + 0x0080) + " " + dec2Hex(x + 0x0080);
+		} else {
+			var w = num >> 18;
+			var z = (num >> 12) & 0x003f;
+			var y = (num >> 6) & 0x003f;
+			var x = num % 0x0040;
+			utf8str = dec2Hex(w + 0x00f0) + " " + dec2Hex(z + 0x0080) + " " + dec2Hex(y + 0x0080) + " " + dec2Hex(x + 0x0080);
+		}
+		str += "<tr><td>U+" + hexnum4 + "</td><td>&#x" + hexnum + ";</td><td>" + utf8str + "</td></tr>";
+	}
+	str += "</table>";
+	$("table").innerHTML = str;
+};
+
+var $ = function(id) {
+	return document.getElementById(id);
+};
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body onload="update();">
+<h1>UTF-8 encoding table and Unicode characters</h1>
+Jump to block: 
+<select id="block" onchange="changeBlock(this.value);">
+<option value="0" selected="selected">U+0000 ... U+007F: Basic Latin</option>
+<option value="128">U+0080 ... U+00FF: Latin-1 Supplement</option>
+<option value="256">U+0100 ... U+017F: Latin Extended-A</option>
+<option value="384">U+0180 ... U+024F: Latin Extended-B</option>
+<option value="592">U+0250 ... U+02AF: IPA Extensions</option>
+
+<option value="688">U+02B0 ... U+02FF: Spacing Modifier Letters</option>
+<option value="768">U+0300 ... U+036F: Combining Diacritical Marks</option>
+<option value="880">U+0370 ... U+03FF: Greek and Coptic</option>
+<option value="1024">U+0400 ... U+04FF: Cyrillic</option>
+<option value="1280">U+0500 ... U+052F: Cyrillic Supplement</option>
+<option value="1328">U+0530 ... U+058F: Armenian</option>
+<option value="1424">U+0590 ... U+05FF: Hebrew</option>
+<option value="1536">U+0600 ... U+06FF: Arabic</option>
+<option value="1792">U+0700 ... U+074F: Syriac</option>
+
+<option value="1872">U+0750 ... U+077F: Arabic Supplement</option>
+<option value="1920">U+0780 ... U+07BF: Thaana</option>
+<option value="1984">U+07C0 ... U+07FF: NKo</option>
+<option value="2048">U+0800 ... U+083F: Samaritan</option>
+<option value="2304">U+0900 ... U+097F: Devanagari</option>
+<option value="2432">U+0980 ... U+09FF: Bengali</option>
+<option value="2560">U+0A00 ... U+0A7F: Gurmukhi</option>
+<option value="2688">U+0A80 ... U+0AFF: Gujarati</option>
+<option value="2816">U+0B00 ... U+0B7F: Oriya</option>
+
+<option value="2944">U+0B80 ... U+0BFF: Tamil</option>
+<option value="3072">U+0C00 ... U+0C7F: Telugu</option>
+<option value="3200">U+0C80 ... U+0CFF: Kannada</option>
+<option value="3328">U+0D00 ... U+0D7F: Malayalam</option>
+<option value="3456">U+0D80 ... U+0DFF: Sinhala</option>
+<option value="3584">U+0E00 ... U+0E7F: Thai</option>
+<option value="3712">U+0E80 ... U+0EFF: Lao</option>
+<option value="3840">U+0F00 ... U+0FFF: Tibetan</option>
+<option value="4096">U+1000 ... U+109F: Myanmar</option>
+
+<option value="4256">U+10A0 ... U+10FF: Georgian</option>
+<option value="4352">U+1100 ... U+11FF: Hangul Jamo</option>
+<option value="4608">U+1200 ... U+137F: Ethiopic</option>
+<option value="4992">U+1380 ... U+139F: Ethiopic Supplement</option>
+<option value="5024">U+13A0 ... U+13FF: Cherokee</option>
+<option value="5120">U+1400 ... U+167F: Unified Canadian Aboriginal Syllabics</option>
+<option value="5760">U+1680 ... U+169F: Ogham</option>
+<option value="5792">U+16A0 ... U+16FF: Runic</option>
+<option value="5888">U+1700 ... U+171F: Tagalog</option>
+
+<option value="5920">U+1720 ... U+173F: Hanunoo</option>
+<option value="5952">U+1740 ... U+175F: Buhid</option>
+<option value="5984">U+1760 ... U+177F: Tagbanwa</option>
+<option value="6016">U+1780 ... U+17FF: Khmer</option>
+<option value="6144">U+1800 ... U+18AF: Mongolian</option>
+<option value="6320">U+18B0 ... U+18FF: Unified Canadian Aboriginal Syllabics Extended</option>
+<option value="6400">U+1900 ... U+194F: Limbu</option>
+<option value="6480">U+1950 ... U+197F: Tai Le</option>
+<option value="6528">U+1980 ... U+19DF: New Tai Lue</option>
+
+<option value="6624">U+19E0 ... U+19FF: Khmer Symbols</option>
+<option value="6656">U+1A00 ... U+1A1F: Buginese</option>
+<option value="6688">U+1A20 ... U+1AAF: Tai Tham</option>
+<option value="6912">U+1B00 ... U+1B7F: Balinese</option>
+<option value="7040">U+1B80 ... U+1BBF: Sundanese</option>
+<option value="7168">U+1C00 ... U+1C4F: Lepcha</option>
+<option value="7248">U+1C50 ... U+1C7F: Ol Chiki</option>
+<option value="7376">U+1CD0 ... U+1CFF: Vedic Extensions</option>
+<option value="7424">U+1D00 ... U+1D7F: Phonetic Extensions</option>
+
+<option value="7552">U+1D80 ... U+1DBF: Phonetic Extensions Supplement</option>
+<option value="7616">U+1DC0 ... U+1DFF: Combining Diacritical Marks Supplement</option>
+<option value="7680">U+1E00 ... U+1EFF: Latin Extended Additional</option>
+<option value="7936">U+1F00 ... U+1FFF: Greek Extended</option>
+<option value="8192">U+2000 ... U+206F: General Punctuation</option>
+<option value="8304">U+2070 ... U+209F: Superscripts and Subscripts</option>
+<option value="8352">U+20A0 ... U+20CF: Currency Symbols</option>
+<option value="8400">U+20D0 ... U+20FF: Combining Diacritical Marks for Symbols</option>
+<option value="8448">U+2100 ... U+214F: Letterlike Symbols</option>
+
+<option value="8528">U+2150 ... U+218F: Number Forms</option>
+<option value="8592">U+2190 ... U+21FF: Arrows</option>
+<option value="8704">U+2200 ... U+22FF: Mathematical Operators</option>
+<option value="8960">U+2300 ... U+23FF: Miscellaneous Technical</option>
+<option value="9216">U+2400 ... U+243F: Control Pictures</option>
+<option value="9280">U+2440 ... U+245F: Optical Character Recognition</option>
+<option value="9312">U+2460 ... U+24FF: Enclosed Alphanumerics</option>
+<option value="9472">U+2500 ... U+257F: Box Drawing</option>
+<option value="9600">U+2580 ... U+259F: Block Elements</option>
+
+<option value="9632">U+25A0 ... U+25FF: Geometric Shapes</option>
+<option value="9728">U+2600 ... U+26FF: Miscellaneous Symbols</option>
+<option value="9984">U+2700 ... U+27BF: Dingbats</option>
+<option value="10176">U+27C0 ... U+27EF: Miscellaneous Mathematical Symbols-A</option>
+<option value="10224">U+27F0 ... U+27FF: Supplemental Arrows-A</option>
+<option value="10240">U+2800 ... U+28FF: Braille Patterns</option>
+<option value="10496">U+2900 ... U+297F: Supplemental Arrows-B</option>
+<option value="10624">U+2980 ... U+29FF: Miscellaneous Mathematical Symbols-B</option>
+<option value="10752">U+2A00 ... U+2AFF: Supplemental Mathematical Operators</option>
+
+<option value="11008">U+2B00 ... U+2BFF: Miscellaneous Symbols and Arrows</option>
+<option value="11264">U+2C00 ... U+2C5F: Glagolitic</option>
+<option value="11360">U+2C60 ... U+2C7F: Latin Extended-C</option>
+<option value="11392">U+2C80 ... U+2CFF: Coptic</option>
+<option value="11520">U+2D00 ... U+2D2F: Georgian Supplement</option>
+<option value="11568">U+2D30 ... U+2D7F: Tifinagh</option>
+<option value="11648">U+2D80 ... U+2DDF: Ethiopic Extended</option>
+<option value="11744">U+2DE0 ... U+2DFF: Cyrillic Extended-A</option>
+<option value="11776">U+2E00 ... U+2E7F: Supplemental Punctuation</option>
+
+<option value="11904">U+2E80 ... U+2EFF: CJK Radicals Supplement</option>
+<option value="12032">U+2F00 ... U+2FDF: Kangxi Radicals</option>
+<option value="12272">U+2FF0 ... U+2FFF: Ideographic Description Characters</option>
+<option value="12288">U+3000 ... U+303F: CJK Symbols and Punctuation</option>
+<option value="12352">U+3040 ... U+309F: Hiragana</option>
+<option value="12448">U+30A0 ... U+30FF: Katakana</option>
+<option value="12544">U+3100 ... U+312F: Bopomofo</option>
+<option value="12592">U+3130 ... U+318F: Hangul Compatibility Jamo</option>
+<option value="12688">U+3190 ... U+319F: Kanbun</option>
+
+<option value="12704">U+31A0 ... U+31BF: Bopomofo Extended</option>
+<option value="12736">U+31C0 ... U+31EF: CJK Strokes</option>
+<option value="12784">U+31F0 ... U+31FF: Katakana Phonetic Extensions</option>
+<option value="12800">U+3200 ... U+32FF: Enclosed CJK Letters and Months</option>
+<option value="13056">U+3300 ... U+33FF: CJK Compatibility</option>
+<option value="13312">U+3400 ... U+4DBF: CJK Unified Ideographs Extension A</option>
+<option value="19904">U+4DC0 ... U+4DFF: Yijing Hexagram Symbols</option>
+<option value="19968">U+4E00 ... U+9FFF: CJK Unified Ideographs</option>
+<option value="40960">U+A000 ... U+A48F: Yi Syllables</option>
+
+<option value="42128">U+A490 ... U+A4CF: Yi Radicals</option>
+<option value="42192">U+A4D0 ... U+A4FF: Lisu</option>
+<option value="42240">U+A500 ... U+A63F: Vai</option>
+<option value="42560">U+A640 ... U+A69F: Cyrillic Extended-B</option>
+<option value="42656">U+A6A0 ... U+A6FF: Bamum</option>
+<option value="42752">U+A700 ... U+A71F: Modifier Tone Letters</option>
+<option value="42784">U+A720 ... U+A7FF: Latin Extended-D</option>
+<option value="43008">U+A800 ... U+A82F: Syloti Nagri</option>
+<option value="43056">U+A830 ... U+A83F: Common Indic Number Forms</option>
+
+<option value="43072">U+A840 ... U+A87F: Phags-pa</option>
+<option value="43136">U+A880 ... U+A8DF: Saurashtra</option>
+<option value="43232">U+A8E0 ... U+A8FF: Devanagari Extended</option>
+<option value="43264">U+A900 ... U+A92F: Kayah Li</option>
+<option value="43312">U+A930 ... U+A95F: Rejang</option>
+<option value="43360">U+A960 ... U+A97F: Hangul Jamo Extended-A</option>
+<option value="43392">U+A980 ... U+A9DF: Javanese</option>
+<option value="43520">U+AA00 ... U+AA5F: Cham</option>
+<option value="43616">U+AA60 ... U+AA7F: Myanmar Extended-A</option>
+
+<option value="43648">U+AA80 ... U+AADF: Tai Viet</option>
+<option value="43968">U+ABC0 ... U+ABFF: Meetei Mayek</option>
+<option value="44032">U+AC00 ... U+D7AF: Hangul Syllables</option>
+<option value="55216">U+D7B0 ... U+D7FF: Hangul Jamo Extended-B</option>
+<option value="55296">U+D800 ... U+DB7F: High Surrogates</option>
+<option value="56192">U+DB80 ... U+DBFF: High Private Use Surrogates</option>
+<option value="56320">U+DC00 ... U+DFFF: Low Surrogates</option>
+<option value="57344">U+E000 ... U+F8FF: Private Use Area</option>
+<option value="63744">U+F900 ... U+FAFF: CJK Compatibility Ideographs</option>
+
+<option value="64256">U+FB00 ... U+FB4F: Alphabetic Presentation Forms</option>
+<option value="64336">U+FB50 ... U+FDFF: Arabic Presentation Forms-A</option>
+<option value="65024">U+FE00 ... U+FE0F: Variation Selectors</option>
+<option value="65040">U+FE10 ... U+FE1F: Vertical Forms</option>
+<option value="65056">U+FE20 ... U+FE2F: Combining Half Marks</option>
+<option value="65072">U+FE30 ... U+FE4F: CJK Compatibility Forms</option>
+<option value="65104">U+FE50 ... U+FE6F: Small Form Variants</option>
+<option value="65136">U+FE70 ... U+FEFF: Arabic Presentation Forms-B</option>
+<option value="65280">U+FF00 ... U+FFEF: Halfwidth and Fullwidth Forms</option>
+
+<option value="65520">U+FFF0 ... U+FFFF: Specials</option>
+<option value="65536">U+10000 ... U+1007F: Linear B Syllabary</option>
+<option value="65664">U+10080 ... U+100FF: Linear B Ideograms</option>
+<option value="65792">U+10100 ... U+1013F: Aegean Numbers</option>
+<option value="65856">U+10140 ... U+1018F: Ancient Greek Numbers</option>
+<option value="65936">U+10190 ... U+101CF: Ancient Symbols</option>
+<option value="66000">U+101D0 ... U+101FF: Phaistos Disc</option>
+<option value="66176">U+10280 ... U+1029F: Lycian</option>
+<option value="66208">U+102A0 ... U+102DF: Carian</option>
+
+<option value="66304">U+10300 ... U+1032F: Old Italic</option>
+<option value="66352">U+10330 ... U+1034F: Gothic</option>
+<option value="66432">U+10380 ... U+1039F: Ugaritic</option>
+<option value="66464">U+103A0 ... U+103DF: Old Persian</option>
+<option value="66560">U+10400 ... U+1044F: Deseret</option>
+<option value="66640">U+10450 ... U+1047F: Shavian</option>
+<option value="66688">U+10480 ... U+104AF: Osmanya</option>
+<option value="67584">U+10800 ... U+1083F: Cypriot Syllabary</option>
+<option value="67648">U+10840 ... U+1085F: Imperial Aramaic</option>
+
+<option value="67840">U+10900 ... U+1091F: Phoenician</option>
+<option value="67872">U+10920 ... U+1093F: Lydian</option>
+<option value="68096">U+10A00 ... U+10A5F: Kharoshthi</option>
+<option value="68192">U+10A60 ... U+10A7F: Old South Arabian</option>
+<option value="68352">U+10B00 ... U+10B3F: Avestan</option>
+<option value="68416">U+10B40 ... U+10B5F: Inscriptional Parthian</option>
+<option value="68448">U+10B60 ... U+10B7F: Inscriptional Pahlavi</option>
+<option value="68608">U+10C00 ... U+10C4F: Old Turkic</option>
+<option value="69216">U+10E60 ... U+10E7F: Rumi Numeral Symbols</option>
+
+<option value="69760">U+11080 ... U+110CF: Kaithi</option>
+<option value="73728">U+12000 ... U+123FF: Cuneiform</option>
+<option value="74752">U+12400 ... U+1247F: Cuneiform Numbers and Punctuation</option>
+<option value="77824">U+13000 ... U+1342F: Egyptian Hieroglyphs</option>
+<option value="118784">U+1D000 ... U+1D0FF: Byzantine Musical Symbols</option>
+<option value="119040">U+1D100 ... U+1D1FF: Musical Symbols</option>
+<option value="119296">U+1D200 ... U+1D24F: Ancient Greek Musical Notation</option>
+<option value="119552">U+1D300 ... U+1D35F: Tai Xuan Jing Symbols</option>
+<option value="119648">U+1D360 ... U+1D37F: Counting Rod Numerals</option>
+
+<option value="119808">U+1D400 ... U+1D7FF: Mathematical Alphanumeric Symbols</option>
+<option value="126976">U+1F000 ... U+1F02F: Mahjong Tiles</option>
+<option value="127024">U+1F030 ... U+1F09F: Domino Tiles</option>
+<option value="127232">U+1F100 ... U+1F1FF: Enclosed Alphanumeric Supplement</option>
+<option value="127488">U+1F200 ... U+1F2FF: Enclosed Ideographic Supplement</option>
+<option value="131072">U+20000 ... U+2A6DF: CJK Unified Ideographs Extension B</option>
+<option value="173824">U+2A700 ... U+2B73F: CJK Unified Ideographs Extension C</option>
+<option value="194560">U+2F800 ... U+2FA1F: CJK Compatibility Ideographs Supplement</option>
+<option value="917504">U+E0000 ... U+E007F: Tags</option>
+
+<option value="917760">U+E0100 ... U+E01EF: Variation Selectors Supplement</option>
+<option value="983040">U+F0000 ... U+FFFFF: Supplementary Private Use Area-A</option>
+<option value="1048576">U+100000 ... U+10FFFF: Supplementary Private Use Area-B</option>
+</select>
+<br/>
+Code positions per page:
+<input type="radio" name="perpage" id="pp128" value="128" checked onclick="changePerpage(this.value);" />128
+<input type="radio" name="perpage" id="pp256" value="256" onclick="changePerpage(this.value);" />256
+<input type="radio" name="perpage" id="pp512" value="512" onclick="changePerpage(this.value);" />512
+<input type="radio" name="perpage" id="pp1024" value="1024" onclick="changePerpage(this.value);" />1024
+</input>
+<div id="table">
+</div>
+<hr/>
+<p>Reference:<br />
+UTF-8 - Wikipedia: <a href="http://en.wikipedia.org/wiki/UTF-8" target="_blank">http://en.wikipedia.org/wiki/UTF-8</a><br />
+Unicode/UTF-8-character table: <a href="http://www.utf8-chartable.de/" target="_blank">http://www.utf8-chartable.de/</a></p>
+<p>&copy;CAQ v0.1 2011/03</p>
+</body>
+</html>

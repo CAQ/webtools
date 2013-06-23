@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Solar elevation angle</title>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+  var marker;
+  var map;
+
+  var $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  var init = function () {
+    var d = new Date();
+    $('year').value = d.getUTCFullYear();
+    $('month').value = d.getUTCMonth() + 1;
+    $('day').value = d.getUTCDate();
+    $('hour').value = d.getUTCHours();
+    $('minute').value = d.getUTCMinutes();
+    $('second').value = d.getUTCSeconds();
+    var utcoffset = -d.getTimezoneOffset() / 60;
+    $('utcoffset').innerHTML = (utcoffset > 0 ? '+' + utcoffset : utcoffset);
+
+    var initpos = new google.maps.LatLng(1.292168, 103.775674);
+    var mapOptions = {
+      zoom: 15,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      center: initpos
+    };
+    map = new google.maps.Map($('map_canvas'), mapOptions);
+    marker = new google.maps.Marker({
+      map:map,
+      draggable:true,
+      position: initpos
+    });
+    google.maps.event.addListener(marker, 'mouseup', updatePosition);
+    updatePosition();
+  };
+
+  var updatePosition = function () {
+    var latlng = marker.position;
+    $('latitude').value = latlng.lat();
+    $('longitude').value = latlng.lng();
+  };
+
+  var calc = function () {
+    try {
+      //var year = parseInt($('year').value);
+      //var month = parseInt($('month').value) - 1;
+      //var day = parseInt($('day').value);
+      //var hour = parseInt($('hour').value);
+      // hour += parseFloat($('longitude').value) / 360 * 24;
+      //var minute = parseInt($('minute').value);
+      //var second = parseInt($('second').value);
+      var exactdate = new Date();
+      exactdate.setUTCFullYear(parseInt($('year').value));
+      exactdate.setUTCMonth(parseInt($('month').value) - 1);
+      exactdate.setUTCDate(parseInt($('day').value));
+      exactdate.setUTCHours(parseInt($('hour').value));
+      exactdate.setUTCMinutes(parseInt($('minute').value));
+      exactdate.setUTCSeconds(parseInt($('second').value));
+      exactdate = new Date(exactdate.valueOf() + parseFloat($('longitude').value) / 360 * 24 * 3600000);
+      //alert(exactdate);
+      var year = exactdate.getUTCFullYear();
+      var month = exactdate.getUTCMonth();
+      var day = exactdate.getUTCDate();
+      var hour = exactdate.getUTCHours();
+      var minute = exactdate.getUTCMinutes();
+      var second = exactdate.getUTCSeconds();
+
+      // hour angle, radians
+      var h = (hour - 12 + minute / 60 + second / 3600) * 15 * Math.PI / 180;
+      // sun declination, radians
+      var today = new Date(year, month, day);
+      var firstday = new Date(year, 0, 1);
+      var dayofyear = Math.ceil((today - firstday) / 86400000) + 1; // Jan. 1st is 1
+      var gamma = 2 * Math.PI / 365 * (dayofyear - 1);
+      var delta = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma) - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma) - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+      // geocentric latitude, radians
+      var phi = parseFloat($('latitude').value) * Math.PI / 180;
+      var ellipsoid = 0.007;
+      var psi = Math.atan((1 - ellipsoid * ellipsoid) * Math.tan(phi));
+
+      // elevation angle, degree
+      var sinthetas = Math.cos(h) * Math.cos(delta) * Math.cos(psi) + Math.sin(delta) * Math.sin(psi);
+      var thetas = Math.asin(sinthetas) * 180 / Math.PI;
+
+      $('angle').innerHTML = thetas + '&deg;';
+    } catch (ex) {
+      alert('Error: ' + ex);
+    }
+  };
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body onload="init();">
+<h1><a href="http://en.wikipedia.org/wiki/Solar_elevation_angle" target="_blank">Solar elevation angle</a></h1>
+Date (UTC+0):
+<input type='text' size='4' id='year' />
+/ <input type='text' size='2' id='month' />
+/ <input type='text' size='2' id='day' />
+<br/>
+Time (UTC+0):
+<input type='text' size='2' id='hour' />
+: <input type='text' size='2' id='minute' />
+: <input type='text' size='2' id='second' />
+Locale: UTC<span id='utcoffset'></span>
+<br/>
+Latitude:
+<input type='text' id='latitude' />
+Longitude:
+<input type='text' id='longitude' />
+<br/>
+<input type='button' value='go!' onclick='calc();' />
+<span id='angle'></span>
+<div id="map_canvas" style="width: 500px; height: 400px;">map div</div>
+</body>
+</html>

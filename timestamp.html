@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style type="text/css">
+td {text-align:center}
+span {color:blue}
+</style>
+<title>Unix Timestamp Converter</title>
+<script type="text/javascript">
+  var addzero = function(num) {
+    if (num < 10)
+        return "0" + num;
+    return "" + num;
+  }
+
+  var date2gmtstr = function(dateobj) {
+    var y = dateobj.getUTCFullYear();
+    var M = dateobj.getUTCMonth() + 1;
+    var d = dateobj.getUTCDate();
+    var h = dateobj.getUTCHours();
+    var m = dateobj.getUTCMinutes();
+    var s = dateobj.getUTCSeconds();
+    return str = y + "-" + addzero(M) + "-" + addzero(d) + " " + addzero(h) + ":" + addzero(m) + ":" + addzero(s);
+  };
+
+  var updateclock = function() {
+    var currenttime = new Date();
+    $("out_currenttimestamp").value = Math.floor(currenttime.getTime()/1000);
+    $("s_currentgmt").innerHTML = currenttime.toUTCString();
+    $("s_currenttz").innerHTML = currenttime.toString();
+  };
+
+  var timestamp2date = function() {
+    var ts = $("in_timestamp").value;
+    if (ts.length > 10)
+        ts = Number(ts);
+    else
+        ts = Number(ts) * 1000;
+    var d = new Date(ts);
+    $("s_gmtdate").innerHTML = d.toUTCString();
+    $("s_tzdate").innerHTML = d.toString();
+  }
+
+  var date2timestamp = function() {
+    var y = $("year").value;
+    var M = Number($("month").value);
+    var d = Number($("date").value);
+    var h = Number($("hour").value);
+    var m = Number($("minute").value);
+    var s = Number($("second").value);
+    var dt = new Date();
+    dt.setUTCFullYear(y);
+    dt.setUTCMonth(M - 1);
+    dt.setUTCDate(d);
+    dt.setUTCHours(h);
+    dt.setUTCMinutes(m);
+    dt.setUTCSeconds(s);
+    $("out_timestamp").value = Math.floor(dt.getTime() / 1000);
+  }
+
+  var $ = function(id) {
+    return document.getElementById(id);
+  };
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body onload="updateclock(); setInterval('updateclock()', 1000);">
+<h1>Unix Timestamp Converter</h1>
+<p>Current timestamp: <input type="text" id="out_currenttimestamp" /><br/>
+GMT: <span id="s_currentgmt">Loading...</span><br/>
+Your time zone: <span id="s_currenttz">Loading...</span></p>
+<p>Timestamp (in s or ms): <input type="text" id="in_timestamp" /><input type="button" value="Timestamp to Human date" onclick="timestamp2date();" /><br />
+GMT: <span id="s_gmtdate"></span><br/>
+Your time zone: <span id="s_tzdate"></span></p>
+<p>
+<table border="0">
+<tr><td>Date:</td><td>YYYY</td><td rowspan="2">-</td><td>MM</td><td rowspan="2">-</td><td>DD</td><td rowspan="2">&nbsp;</td><td>HH</td><td rowspan="2">:</td><td>mm</td><td rowspan="2">:</td><td>ss</td></tr>
+<tr><td><font color="red">GMT</font></td><td><input type="text" id="year" size="4" /><td><input type="text" id="month" size="2" /><td><input type="text" id="date" size="2" />
+<td><input type="text" id="hour" size="2" /><td><input type="text" id="minute" size="2" /><td><input type="text" id="second" size="2" /></tr>
+</table>
+<input type="button" value="Human date to Timestamp" onclick="date2timestamp();" />
+Timestamp: <input type="text" id="out_timestamp" /></p>
+<hr/>
+by CAQ, v0.1<br/>
+Reference: <a href="http://www.epochconverter.com/" target="_blank">Epoch & Unix Timestamp Conversion Tools</a>
+</body>
+</html>
+

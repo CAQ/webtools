@@ -1,0 +1,439 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>Dream World</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<script type="text/javascript">
+			var setInput = function () {
+				var inputs = document.getElementsByTagName("input");
+				for (var i=0; i<inputs.length; i++) {
+					if (inputs[i].type=="text") {
+						if (inputs[i].addEventListener) {
+							inputs[i].addEventListener("mouseover", myInputFunc, false);
+						} else if (inputs[i].attachEvent) {
+							inputs[i].attachEvent("onmouseover", myInputFunc);
+						} else {
+							inputs[i].onmouseover = myInputFunc;
+						}
+					}
+				}
+				inputs = document.getElementsByTagName("textarea");
+				for (var i=0; i<inputs.length; i++) {
+					if (inputs[i].addEventListener) {
+						inputs[i].addEventListener("mouseover", myInputFunc, false);
+					} else if (inputs[i].attachEvent) {
+						inputs[i].attachEvent("onmouseover", myInputFunc);
+					} else {
+						inputs[i].onmouseover = myInputFunc;
+					}
+				}
+			};
+
+			var fill_solve = function (t, u) {
+				var a = t / u;
+				return [Math.floor(a), a - Math.floor(a)];
+			};
+			
+			var fill = function () {
+				var t = parseFloat($("fill_total").value);
+				var u = parseFloat($("fill_unit").value);
+				var ab = fill_solve(t, u);
+				$("fill_answer").innerHTML = ab[0] + " (" + ab[1] + ")";  
+			};
+			
+			var farm_solve = function (h, l, l1, l2) {
+				var y = (l - h * l1) / (l2 - l1);
+				var x = h - y;
+				return [x, y];
+			};
+			
+			var farm = function () {
+				var h = parseInt($("farm_head").value);
+				var l = parseInt($("farm_leg").value);
+				var l1 = parseInt($("farm_leg1").value);
+				var l2 = parseInt($("farm_leg2").value);
+				var xy = farm_solve(h, l, l1, l2);
+				var x = xy[0], y = xy[1];
+				$("farm_answer").innerHTML = l1 + "-legged: " + x + ", " + l2 + "-legged: " + y;
+			};
+			
+			var lamp_solve = function (t11, t12, t13, t21, t22, t23, t31, t32, t33) {
+				var ans = "<table><tr>";
+				for (var i11=0; i11<2; i11++)
+				for (var i12=0; i12<2; i12++)
+				for (var i13=0; i13<2; i13++)
+					for (var i21=0; i21<2; i21++)
+					for (var i22=0; i22<2; i22++)
+					for (var i23=0; i23<2; i23++)
+						for (var i31=0; i31<2; i31++)
+						for (var i32=0; i32<2; i32++)
+						for (var i33=0; i33<2; i33++) {
+							if (i11+i12+i13+i21+i22+i23+i31+i32+i33 != 4) continue;
+							if (t11 != i12+i21) continue;
+							if (t13 != i12+i23) continue;
+							if (t31 != i32+i21) continue;
+							if (t33 != i32+i23) continue;
+							if (t12 != i11+i22+i13) continue;
+							if (t21 != i11+i22+i31) continue;
+							if (t23 != i13+i22+i33) continue;
+							if (t32 != i31+i22+i33) continue;
+							if (t22 != i12+i21+i32+i23) continue;
+							ans += "<td>"+i11+i12+i13+"<br/>"+i21+i22+i23+"<br/>"+i31+i32+i33+"<td/>";
+						}
+				ans += "</tr></table>";
+				return ans;
+			};
+			
+			var lamp = function () {
+				var t11 = parseInt($("lamp11").value);
+				var t12 = parseInt($("lamp12").value);
+				var t13 = parseInt($("lamp13").value);
+				var t21 = parseInt($("lamp21").value);
+				var t22 = parseInt($("lamp22").value);
+				var t23 = parseInt($("lamp23").value);
+				var t31 = parseInt($("lamp31").value);
+				var t32 = parseInt($("lamp32").value);
+				var t33 = parseInt($("lamp33").value);
+				var ans = lamp_solve(t11, t12, t13, t21, t22, t23, t31, t32, t33);
+				$("lamp_answer").innerHTML = ans;
+			};
+			
+			var wholemap = [];
+			var colors = ['R', 'G', 'B', 'Y'];
+			
+			var box_num2str = function (num) {
+				var str = "";
+				while (num > 0) {
+					str = colors[num % 4] + str;
+					num = Math.floor(num / 4);
+				}
+				while (str.length < 4)
+					str = colors[0] + str;
+				return str;
+			};
+			
+			var box_comprStr = function (s1, s2) {
+				var comp1 = [false, false, false, false],
+					comp2 = [false, false, false, false];
+				var c = 0;
+				for (var i = 0; i < 4; i++)
+					if (s1.charAt(i) == s2.charAt(i)) {
+						c++;
+						comp1[i] = true;
+						comp2[i] = true;
+					}
+				var p = 0;
+				for (var i = 0; i < 4; i++) {
+					for (var j = 0; j < 4; j++) {
+						if (i == j)
+							continue;
+						if (comp1[i] || comp2[j])
+							continue;
+						if (s1.charAt(i) == s2.charAt(j)) {
+							p++;
+							comp1[i] = true;
+							comp2[j] = true;
+						}
+					}
+				}
+				return "C" + c + "P" + p;
+			};
+
+			var box_changecolor = function () {
+				$("box_guess").value = $("box_suggestion").value;
+			}
+			
+			var box = function () {
+				if (wholemap.length < 256) {
+					wholemap = [];
+					for (var i=0; i<256; i++) {
+						wholemap.push(true);
+					} 
+				}
+				var guesses = $("box_guess").value.toUpperCase();
+				var c = parseInt($("box_c").value);
+				var p = parseInt($("box_p").value);
+				for (var i=0; i<256; i++) {
+					if (!wholemap[i]) continue;
+					var stri = box_num2str(i);
+					var compr = box_comprStr(stri, guesses);
+					if (compr != "C"+c+"P"+p) {
+						wholemap[i] = false;
+					}
+				}
+				var count = 0;
+				$("box_suggestion").innerHTML = "";
+				for (var i=0; i<256 && count<10; i++) {
+					if (wholemap[i]) {
+						$("box_suggestion").innerHTML += '<option>' + box_num2str(i) + '</option>';
+						count++;
+					}
+				}
+			};
+			
+			var boxReset = function () {
+				wholemap = [];
+				for (var i=0; i<256; i++) {
+					wholemap.push(true);
+				}
+				$("box_suggestion").innerHTML = "";
+				$("box_guess").value = "RGBY";
+			};
+			
+			var solve = function () {
+				if ($("cb_cleartrivia").checked) {
+					$("triviaquestion").value = "";
+					$("triviasearch").value = "";
+				}
+				$("full_answer").innerHTML = "";
+				var fulldesc = $("fulldesc").value;
+				if (fulldesc.indexOf("gallon") > 0) { // Filling water
+					var txt_h = fulldesc.match(/have[0-9\s]+gallon/)[0];
+					var txt_c = fulldesc.match(/many[0-9\s]+gallon/)[0];
+					var h = parseInt(txt_h.substring(4, txt_h.length-7));
+					var c = parseInt(txt_c.substring(4, txt_h.length-7));
+					var ans = fill_solve(h, c);
+					$("full_answer").innerHTML = ans[0];
+				} else if (fulldesc.indexOf("heads and") > 0) { // Animal farm
+					var txt_h = fulldesc.match(/of[0-9\s]+heads/)[0];
+					var txt_l = fulldesc.match(/and[0-9\s]+legs/)[0];
+					var txt_animals = fulldesc.match(/there are [a-z\-]+ and [a-z\-]+\./)[0];
+					var txt_ask = fulldesc.match(/many [a-z\-]+ are/)[0];
+					var h = parseInt(txt_h.substring(2, txt_h.length-6));
+					var l = parseInt(txt_l.substring(3, txt_l.length-5));
+					var l12 = [0, 0];
+					var animalnames = ["chicken", "three-legged-cow", "horse"];
+					for (var j=0; j<2; j++) {
+						for (var i=0; i<animalnames.length; i++) {
+							if (txt_animals.indexOf(animalnames[i]) > 0) {
+								l12[j] = i + 2;
+								txt_animals = txt_animals.replace(animalnames[i], "");
+								break;
+							}
+						}
+					}
+					var xy = farm_solve(h, l, l12[0], l12[1]);
+					var ask_i = 0;
+					while (ask_i<animalnames.length) {
+						if (txt_ask.indexOf(animalnames[ask_i]) > 0) {
+							break;
+						}
+						ask_i++;
+					}
+					var ans = (l12[0]==ask_i+2) ? xy[0] : xy[1];
+					$("full_answer").innerHTML = ans;
+				} else if (fulldesc.indexOf("incorrect)") > 0 || fulldesc.length < 30) { // Four lamps
+					var txt = fulldesc.replace(/\s+/g, " ");
+					txt = txt.replace(/^\s+|\s+$/g, "");
+					var nums = txt.split(" ");
+					if (nums.length < 9) {
+						$("full_answer").innerHTML = "Parsing error (four lamps): Too few numbers";
+						return;
+					}
+					var t11 = parseInt(nums[nums.length-9]);
+					var t12 = parseInt(nums[nums.length-8]);
+					var t13 = parseInt(nums[nums.length-7]);
+					var t21 = parseInt(nums[nums.length-6]);
+					var t22 = parseInt(nums[nums.length-5]);
+					var t23 = parseInt(nums[nums.length-4]);
+					var t31 = parseInt(nums[nums.length-3]);
+					var t32 = parseInt(nums[nums.length-2]);
+					var t33 = parseInt(nums[nums.length-1]);
+					var ans = lamp_solve(t11, t12, t13, t21, t22, t23, t31, t32, t33);
+					$("full_answer").innerHTML = ans;
+				} else {
+					$("full_answer").innerHTML = "Unknown problem";
+				}
+			};
+
+function unique(data, hintsregexp){
+    data = data || [];
+    var a = {};
+    for (var i=0; i<data.length; i++) {
+        var v = data[i].toLowerCase().match(new RegExp(hintsregexp, "ig"))[0];
+        if (typeof(a[v]) == 'undefined'){
+            a[v] = 1;
+        }
+    };
+    data.length=0;
+    for (var i in a){
+        data[data.length] = i;
+    }
+    return data;
+}
+
+			var trivia = function () {
+				$("trivia_answer").innerHTML = "";
+				var hinttxt = $("triviaquestion").value;
+				if (hinttxt.indexOf("Hint:") > 0) {
+					var hints = hinttxt.match(/\(Hint:[0-9a-zA-Z_\s]+\)/g)[0];
+					var hintsregexp = hints.replace(/^\(Hint:\s*|\s*\)$/g, "");
+					hintsregexp = hintsregexp.replace(/_/g, ".");
+					hintsregexp = hintsregexp.replace(/\s/g, "\\s");
+					var suggs = $("triviasearch").value.match(new RegExp("[^a-zA-Z]"+hintsregexp+"[^a-zA-Z]", "ig"));
+					suggs = unique(suggs, hintsregexp);
+					if (suggs.length < 1) {
+						$("trivia_answer").innerHTML = "(No suggestions available.)";
+					} else {
+						for (var i=0; i<suggs.length; i++) {
+							$("trivia_answer").innerHTML += suggs[i] + "<br/>";
+						}
+					}
+				}
+			};
+
+			var generateQuery = function () {
+				var hinttxt = $("triviaquestion").value;
+				if (hinttxt.indexOf("Hint:") > 0) {
+					var desc = hinttxt.replace(/\(Hint:\s*.*_+.*\)/g, "");
+					desc = desc.replace(/^\s+|\s+$/g, "");
+					var encodedesc = encodeURIComponent(desc);
+					encodedesc = encodedesc.replace(/%20/g, "+");
+					$("searchlink").href = "http://www.google.com/search?hl=en&q=" + encodedesc;
+				}
+			};
+
+			var $ = function (id) {
+				return document.getElementById(id);
+			};
+			
+			var myInputFunc = function () {
+				this.select();
+			}
+		</script>
+	</head>
+
+	<body onload="setInput();">
+		<h2>
+			<a href="http://www.kongregate.com/games/kingk/dream-world"
+				target="_blank">Dream World</a> Solver 0.33
+		</h2>
+		<h3>
+			Color box
+		</h3>
+		<table>
+			<tr>
+				<td>
+					Guess:
+					<input type="text" id="box_guess" size="4" value="RGBY"
+						maxlength="4" />
+					C
+					<input type="text" size="1" id="box_c" maxlength="1" />
+					P
+					<input type="text" size="1" id="box_p" maxlength="1" />
+				</td>
+				<td>
+					<input type="button" value="Answer" onclick="box();" />
+				</td>
+				<td>
+					<select multiple id="box_suggestion" size="5"
+						onclick="box_changecolor();"></select>
+				</td>
+				<td>
+					<input type="button" value="Reset" onclick="boxReset();" />
+				</td>
+			</tr>
+		</table>
+		<h3>
+			Filling water, Animal farm and Four lamps
+		</h3>
+		<table>
+			<tr>
+				<td>
+					<textarea rows="5" cols="50%" id="fulldesc"></textarea>
+				</td>
+				<td>
+					<input type="button" value="Answer" onclick="solve();" /><br/>
+					<input type="checkbox" id="cb_cleartrivia" checked />Clear Trivia box
+				</td>
+				<td>
+					<span id="full_answer"> </span>
+				</td>
+			</tr>
+		</table>
+		<h3>
+			Wiseman's Trivia (beta)
+		</h3>
+		<table>
+			<tr>
+				<td>
+					Question:<br/>
+					<textarea rows="5" cols="33%" id="triviaquestion" onmouseout="generateQuery();"></textarea>
+				</td>
+				<td>
+					Your <a href="http://www.google.com/" target="_blank" id="searchlink">search</a> results:<br/>
+					<textarea rows="5" cols="33%" id="triviasearch"></textarea>
+				</td>
+				<td>
+					<input type="button" value="Answer" onclick="trivia();" />
+				</td>
+				<td>
+					Suggest answer(s):<br/>
+					<span id="trivia_answer"> </span>
+				</td>
+			</tr>
+		</table>
+		<hr />
+		<h3>
+			Filling water
+		</h3>
+		Total:
+		<input type="text" id="fill_total" />
+		Unit:
+		<input type="text" id="fill_unit" />
+		<input type="button" value="Answer" onclick="fill();" />
+		<span id="fill_answer"> </span>
+		<h3>
+			Animal farm
+		</h3>
+		Heads:
+		<input type="text" id="farm_head" />
+		Legs:
+		<input type="text" id="farm_leg" />
+		<br />
+		Animal 1's legs:
+		<input type="text" id="farm_leg1" value="3" size="1" />
+		Animal 2's legs:
+		<input type="text" id="farm_leg2" value="4" size="1" />
+		<input type="button" value="Answer" onclick="farm();" />
+		<span id="farm_answer"> </span>
+		<h3>
+			Four lamps
+		</h3>
+		<table border="0">
+			<tr>
+				<td>
+					<input type="text" size="1" id="lamp11" maxlength="1" />
+					<input type="text" size="1" id="lamp12" maxlength="1" />
+					<input type="text" size="1" id="lamp13" maxlength="1" />
+					<br />
+					<input type="text" size="1" id="lamp21" maxlength="1" />
+					<input type="text" size="1" id="lamp22" maxlength="1" />
+					<input type="text" size="1" id="lamp23" maxlength="1" />
+					<br />
+					<input type="text" size="1" id="lamp31" maxlength="1" />
+					<input type="text" size="1" id="lamp32" maxlength="1" />
+					<input type="text" size="1" id="lamp33" maxlength="1" />
+				</td>
+				<td>
+					<input type="button" value="Answer" onclick="lamp();" />
+				</td>
+				<td>
+					<span id="lamp_answer"> </span>
+				</td>
+			</tr>
+		</table>
+		<hr />
+		by CAQ at CAQ9.info
+	</body>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-401140-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</html>

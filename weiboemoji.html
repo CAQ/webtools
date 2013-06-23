@@ -1,0 +1,86 @@
+<html>
+<head>
+<title>Weibo iPhone Emoji List</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style type="text/css">
+table {border: 1px solid; border-collapse: collapse;}
+td, th {border: 1px solid; text-align: center; vertical-align: middle;}
+</style>
+<script type="text/javascript">
+var startpos = 0;
+
+var dec2Hex = function(num, len) {
+	var s = num.toString(16);
+	if (len == null)
+		return s;
+	while (s.length < len)
+		s = "0" + s;
+	return s;
+};
+
+var update = function() {
+	$("table").innerHTML = "";
+	var str = '';
+	str += "<table><tr><th>Unicode code point</th><th>character</th><th>UTF-8 (hex.)</th><th>Weibo image</th></tr>";
+	for (var num = 0xe001; num < 0xe538; num++) {
+            if (num <= 0xe05a || (num >= 0xe101 && num <= 0xe15a) || (num >= 0xe201 && num <= 0xe253) || (num >= 0xe301 && num <= 0xe34d) || (num >= 0xe401 && num <= 0xe44c) || (num >= 0xe501)) {
+		var hexnum = dec2Hex(num), hexnum4 = dec2Hex(hexnum, 4);
+		var utf8str = "";
+		if (num <= 0x007f)
+			utf8str = dec2Hex(num, 2);
+		else if (num <= 0x07ff) {
+			var y = num >> 6;
+			var x = (num & 0x003f);
+			utf8str = dec2Hex(y + 0x00c0) + " " + dec2Hex(x + 0x0080);
+		} else if (num <= 0xffff) {
+			var z = num >> 12;
+			var y = (num & 0x0fff) >> 6;
+			var x = (num & 0x003f);
+			utf8str = dec2Hex(z + 0x00e0) + " " + dec2Hex(y + 0x0080) + " " + dec2Hex(x + 0x0080);
+		} else {
+			var w = num >> 18;
+			var z = (num >> 12) & 0x003f;
+			var y = (num >> 6) & 0x003f;
+			var x = num % 0x0040;
+			utf8str = dec2Hex(w + 0x00f0) + " " + dec2Hex(z + 0x0080) + " " + dec2Hex(y + 0x0080) + " " + dec2Hex(x + 0x0080);
+		}
+                var urlstr = utf8str.replace(/ /g, '');
+		str += "<tr><td>U+" + hexnum4 + "</td><td>&#x" + hexnum + ";</td><td>" + utf8str + "</td><td><img src='http://img.t.sinajs.cn/t3/style/images/common/face/emimage/" + urlstr + ".png'/></td></tr>";
+            }
+	}
+	str += "</table>";
+	$("table").innerHTML = str;
+};
+
+var $ = function(id) {
+	return document.getElementById(id);
+};
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body onload="update();">
+<h1>Weibo iPhone Emoji List</h1>
+<div id='table'></div>
+<hr/>
+<p>Reference:<br />
+<a href="http://blog.sina.com.cn/s/blog_69081e060100wdpv.html" target="_blank">[转载]emoji</a><br />
+<a href="http://www.unicode.org/~scherer/emoji4unicode/snapshot/full.html" target="_blank">Emoji Symbols: Background Data</a><br />
+<a href="http://creation.mb.softbank.jp/mc/tech/tech_pic/pic_material_1.html" target="_blank">絵文字</a>
+</p>
+<p>&copy;CAQ v0.1 2011/12</p>
+</body>
+</html>

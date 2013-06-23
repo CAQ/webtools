@@ -1,0 +1,223 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>NUS Shuttle Schedule</title>
+<script type="text/javascript">
+    var init = function() {
+        while ($('hour').options.length > 0) {
+            $('hour').options.remove(0);
+        }
+        for (var i=7; i<24; i++) {
+            var option = document.createElement('option');
+            option.text = i;
+            option.value = i;
+            $('hour').options.add(option);
+        }
+
+        while ($('minute').options.length > 0)
+            $('minute').options.remove(0);
+        for (var i=0; i<60; i+=5) {
+            var option = document.createElement('option');
+            option.text = i;
+            option.value = i;
+            $('minute').options.add(option);
+        }
+
+        var d = new Date();
+        if (d.getHours() >= 7 && d.getHours() <= 23) {
+            $('hour').selectedIndex = d.getHours() - 7;
+        }
+        $('minute').selectedIndex = Math.ceil(d.getMinutes() / 5);
+        if (d.getMinutes() > 55) {
+            $('minute').selectedIndex = 11;
+        }
+        switch (d.getDay()) {
+        case 6:
+            $('dow').selectedIndex = 1;
+            break;
+        case 0:
+            $('dow').selectedIndex = 2;
+            break;
+        default:
+            $('dow').selectedIndex = 0;
+        }
+
+    };
+
+    var checkFreq = function() {
+        var term = $('term').value;
+        var dow = $('dow').value;
+        var hour = Number($('hour').value);
+        var minute = Number($('minute').value);
+        var service = $('service').value;
+        var t = hour * 60 + minute;
+
+        var freq = "No Service";
+        switch (service) {
+            case 'a1':
+            case 'a2':
+                if (term == 'semester') {
+                    if (dow == 'weekday') {
+                        if ((t >= 7*60+15 && t <= 9*60) ||
+                            (t >= 12*60 && t <= 14*60) ||
+                            (t >= 17*60 && t <= 20*60)) {
+                                freq = "6 ~ 8";
+                        } else if (t >= 9*60+1 && t <= 16*60+59) {
+                            freq = "10 ~ 12";
+                        } else if (t >= 20*60+1 && t <= 23*60) {
+                            freq = "15 ~ 18";
+                        }
+                    } else if (dow == 'saturday') {
+                        if (t >= 7*60+15 && t <= 20*60) {
+                            freq = "15 ~ 18";
+                        } else if (t >= 20*60+1 && t <= 23*60) {
+                            freq = "30 ~ 33";
+                        }
+                    } else {
+                        if (t >= 9*60+1 && t <= 23*60) {
+                            freq = "30 ~ 33";
+                        }
+                    }
+                } else {
+                    if (dow == 'sunday') {
+                        if (t >= 9*60+1 && t <= 23*60) {
+                            freq = "30 ~ 33";
+                        }
+                    } else if (t >= 7*60+15 && t <= 19*60) {
+                        freq = "15 ~ 18";
+                    } else if (t >= 19*60+1 && t <= 23*60) {
+                        freq = "30 ~ 33";
+                    }
+                }
+                break;
+            case 'b':
+            case 'c':
+                if (dow == 'weekday') {
+                    if (term == 'semester') {
+                        if ((t >= 7*60+15 && t <= 9*60+30) ||
+                            (t >= 12*60 && t <= 14*60) ||
+                            (t >= 17*60 && t <= 19*60)) {
+                            freq = "10 ~ 12";
+                        } else if (t >= 9*60+31 && t <= 16*60+59) {
+                            freq = "14 ~ 16";
+                        } else if (t >= 19*60+1 && t <= 23*60) {
+                            freq = "30 ~ 33";
+                        }
+                    } else {
+                        if (t >= 7*60+15 && t <= 19*60) {
+                            freq = "14 ~ 16";
+                        } else if (t >= 19*60+1 && t <= 23*60) {
+                            freq = "30 ~ 33";
+                        }
+                    }
+                } else if (dow == 'saturday') {
+                    if (t >= 7*60+15 && t <= 14*60) {
+                        freq = "14 ~ 16";
+                    } else if (t >= 14*60+1 && t <= 19*60) {
+                        freq = "30 ~ 33";
+                    }
+                }
+                break;
+            case 'd':
+            case 'd1':
+            case 'd2':
+                if (term == 'semester' && dow == 'weekday') {
+                    if ((t >= 7*60+15 && t <= 9*60) ||
+                        (t >= 12*60 && t <= 14*60) ||
+                        (t >= 17*60 && t <= 20*60)) {
+                        freq = "6 ~ 8";
+                    } else if (t >= 9*60+1 && t <= 16*60+59) {
+                        freq = "10";
+                    } else if (t >= 20*60+1 && t <= 23*60) {
+                        freq = "15";
+                    }
+                } else if (dow == 'weekday') { // term == 'vacation'
+                    if (t >= 7*60+15 && t <= 19*60) {
+                        freq = "10";
+                    } else if (t >= 19*60+1 && t <= 23*60) {
+                        freq = "30";
+                    }
+                } else if (dow == 'saturday') {
+                    if (t >= 7*60+15 && t <= (term=='semester' ? 20*60 : 19*60)) {
+                        freq = "15";
+                    } else if (t >= (term=='semester' ? 20*60+1 : 19*60+1) && t <= 23*60) {
+                        freq = "30";
+                    }
+                } else if (dow == 'sunday') {
+                    if (t >= 9*60+1 && t <= 23*60) {
+                        freq = "30";
+                    }
+                }
+                break;
+        }
+        $('freq').innerHTML = freq;
+        $('freqtable').innerHTML = "";
+        if (freq == "30 ~ 33") {
+            switch (service) {
+            case 'a1':
+                $('freqtable').innerHTML = 'A1 departs from PGP at 00/30';
+                break;
+            case 'a2':
+                $('freqtable').innerHTML = 'A2 departs from PGP at 15/45';
+                break;
+            case 'b':
+                $('freqtable').innerHTML = 'B reaches COM2 at 10/40';
+                break;
+            }
+        }
+    };
+
+    var $ = function(id) {
+        return document.getElementById(id);
+    };
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28888073-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body onload='init();'>
+<h1>NUS Shuttle Schedule</h1>
+<p>
+<select id='term' onchange='checkFreq();'>
+    <option value='semester'>Semester</option>
+    <option value='vacation' selected>Vacation</option>
+</select>
+<select id='dow' onchange='checkFreq();'>
+    <option value="weekday">Weekday</option>
+    <option value="saturday">Saturday</option>
+    <option value="sunday">Sunday / Public holiday</option>
+</select>
+<select id='hour' onchange='checkFreq();'>
+</select>
+<select id='minute' onchange='checkFreq();'>
+</select>
+<select id='service' onchange='checkFreq();'>
+    <option value='a1'>A1 (counterclockwise)</option>
+    <option value='a2'>A2 (clockwise)</option>
+    <option value='b'>B</option>
+    <option value='c'>C</option>
+    <option value='d1'>D1 (clockwise)</option>
+    <option value='d2'>D2 (counterclockwise)</option>
+</select>
+<input type='submit' onclick='checkFreq();' />
+<div id='freq'>
+</div>
+<div id='freqtable'>
+</div>
+</p>
+<hr>
+Copyleft CAQ, 2011. <a href='http://www.nus.edu.sg/oed/services/transport/shuttle-bus-services.htm' target='_blank'>Original Link</a>
+</body>
+</html>
