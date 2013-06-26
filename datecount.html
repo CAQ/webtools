@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style type="text/css">
+td {text-align:center}
+span {color:blue}
+</style>
+<title>Date Counter</title>
+<script type="text/javascript">
+  var addzero = function(num) {
+    if (num < 10)
+        return "0" + num;
+    return "" + num;
+  };
+
+  var loadToday = function() {
+    var currenttime = new Date();
+    var y = currenttime.getFullYear(), m = currenttime.getMonth() + 1, d = currenttime.getDate();
+    $("y0").value = y; $("m0").value = m; $("d0").value = d;
+    $("y1").value = y; $("m1").value = m; $("d1").value = d;
+    $("y2").value = y; $("m2").value = m; $("d2").value = d;
+  };
+
+  var countdate = function() {
+    var y0 = Number($("y0").value), m0 = Number($("m0").value) - 1, d0 = Number($("d0").value);
+    var dt0 = new Date();
+    dt0.setFullYear(y0); dt0.setMonth(m0); dt0.setDate(d0);
+    var c = Number($("count").value);
+
+    var dt = new Date(dt0.getTime() + c * 86400 * 1000)
+    var y = dt.getFullYear();
+    var M = dt.getMonth() + 1;
+    var d = dt.getDate();
+    $("targetspan").innerHTML = y + "-" + addzero(M) + "-" + addzero(d);
+  };
+
+  var datediff = function() {
+    var y1 = Number($("y1").value), m1 = Number($("m1").value) - 1, d1 = Number($("d1").value);
+    var y2 = Number($("y2").value), m2 = Number($("m2").value) - 1, d2 = Number($("d2").value);
+    var dt1 = new Date(), dt2 = new Date();
+    dt1.setFullYear(y1); dt1.setMonth(m1); dt1.setDate(d1);
+    dt2.setFullYear(y2); dt2.setMonth(m2); dt2.setDate(d2);
+    $("diffspan").innerHTML = Math.floor((dt2.getTime() - dt1.getTime()) / 1000 / 86400) + " day(s)";
+  };
+
+  var $ = function(id) {
+    return document.getElementById(id);
+  };
+</script>
+
+</head>
+
+<body onload="loadToday();">
+<h1>Date Counter</h1>
+
+<p>Date difference:</p>
+<table border="0">
+<tr><td>Date:</td><td>YYYY</td><td rowspan="3">-</td><td>MM</td><td rowspan="3">-</td><td>DD</td></tr>
+<tr><td>From</td><td><input type="text" id="y1" size="4" /><td><input type="text" id="m1" size="2" /><td><input type="text" id="d1" size="2" /></td></tr>
+<tr><td>To</td><td><input type="text" id="y2" size="4" /><td><input type="text" id="m2" size="2" /><td><input type="text" id="d2" size="2" /></td></tr>
+</table>
+<input type="button" value="Difference" onclick="datediff();" />
+<span id="diffspan">-- day(s)</span>
+
+<p>Date count:</p>
+<table border="0">
+<tr><td>Date:</td><td>YYYY</td><td rowspan="3">-</td><td>MM</td><td rowspan="3">-</td><td>DD</td></tr>
+<tr><td>After</td><td><input type="text" id="y0" size="4" /><td><input type="text" id="m0" size="2" /><td><input type="text" id="d0" size="2" /></td></tr>
+<tr><td>for</td><td><input type="text" id="count" size="4" value="0" /></td><td colspan="2">days</td></tr>
+</table>
+<input type="button" value="Target" onclick="countdate();" />
+<span id="targetspan">----</span>
+
+
+<hr/>
+by CAQ, v0.1<br/>
+Reference: <a href="http://bjtime.cn/riqi.asp" target="_blank">日期计算器</a>
+</body>
+</html>
+
