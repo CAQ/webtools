@@ -5,7 +5,7 @@
 </head>
 <body>
 <p>
-URI: <input type='text' id='uri' onkeyup='$("enc").value=encodeURIComponent(this.value);' onmouseover='this.focus();' style='width:90%;' />
+URI: <input type='text' id='uri' onkeyup='document.getElementById("enc").value=encodeURIComponent(this.value);' onmouseover='this.focus();' style='width:90%;' />
 </p>
 <p>
 encodeURIComponent: <input type='text' id='enc' onmouseover='this.focus();this.select();' style='width:80%;' />
