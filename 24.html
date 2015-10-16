@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Twenty-four Game</title>
+<script type="text/javascript">
+var nums;
+var allNums, allOps;
+var OPS = ['+', '-', '*', '/'];
+var output;
+
+// http://stackoverflow.com/questions/9960908/permutations-in-javascript
+var permArr, usedChars;
+function permute(input) {
+  var i, ch;
+  for (i = 0; i < input.length; i++) {
+    ch = input.splice(i, 1)[0];
+    usedChars.push(ch);
+    if (input.length == 0) {
+      permArr.push(usedChars.slice());
+    }
+    permute(input);
+    input.splice(i, 0, ch);
+    usedChars.pop();
+  }
+  return permArr;
+};
+
+
+var genOps = function(prefix) {
+  if (prefix.length == nums.length - 1) {
+    allOps.push(prefix.split(''));
+    return;
+  }
+  for (var op = 0; op < 4; op++) {
+    genOps(prefix.concat(op));
+  }
+}
+
+var init = function() {
+  // Initialize the numbers permutation
+  allNums = {};
+  var indices = [];
+  for (var i = 0; i < nums.length; i++) {
+    indices.push(i);
+  }
+  permArr = [];
+  usedChars = [];
+  permute(indices);
+  for (var i = 0; i < permArr.length; i++) {
+    var perm = permArr[i];
+    var num = [];
+    for (var j = 0; j < perm.length; j++) {
+      num.push(nums[perm[j]]);
+    }
+    allNums[num.join(" ")] = true;
+  }
+  allNums = Object.keys(allNums);
+  // document.getElementById("result").innerHTML = allNums.join(';');
+
+  // Initialize the operators permutation
+  allOps = [];
+  genOps("");
+  // document.getElementById("result").innerHTML = allOps.join(';');
+};
+
+
+var Node = function(v, op) {
+  this.v = v;
+  this.op = op;
+  this.left = null;
+  this.right = null;
+};
+Node.prototype.toString = function () {
+  if (this.left == null && this.right == null) return "" + this.v;
+  return "" + OPS[this.op];
+}
+
+
+var cloneNode = function (n) {
+  var nNode = new Node(n.v, n.op);
+  if (n.left != null) {
+    nNode.left = cloneNode(n.left);
+  }
+  if (n.right != null) {
+    nNode.right = cloneNode(n.right);
+  }
+  return nNode;
+};
+
+var printNode = function (n) {
+  if (n == null) return "#";
+  if (n.left == null && n.right == null) return n.toString();
+  return "(" + printNode(n.left) + " " + n.toString() + " " + printNode(n.right) + ")";
+  // return n.toString() + " (" + printNode(n.left) + " " + printNode(n.right) + ")";
+};
+
+var calculate = function (n) {
+  if (n.left == null && n.right == null) return Number(n.v);
+  var l = Number(calculate(n.left)), r = Number(calculate(n.right));
+  switch (n.op) {
+    case "0": return l + r;
+    case "1": return l - r;
+    case "2": return l * r;
+    case "3": return l / r;
+    default: return 0 / 0;
+  }
+};
+
+
+
+var createTrees = function() {
+  output = [];
+  var topologies = {};
+  topologies[1] = [new Node(0, 0)];
+  for (var i = 3; i <= nums.length * 2 - 1; i += 2) {
+    var list = [];
+    for (var j = 1; j < i; j += 2) {
+      var left = topologies[j], right = topologies[i - j - 1];
+      var comb = generateCombinations(left, right);
+      for (var k = 0; k < comb.length; k++) {
+        list.push(comb[k]);
+      }
+    }
+    topologies[i] = list;
+  }
+  var result = topologies[nums.length * 2 - 1];
+  // document.getElementById("result").innerHTML = result.join(" ");
+
+  for (var i = 0; i < result.length; i++) {
+    var tree = result[i];
+    for (var j = 0; j < allNums.length; j++) {
+      var ns = allNums[j].split(" ");
+      var nList = [];
+      for (var k = 0; k < ns.length; k++) {
+        nList.push(ns[k]);
+      }
+      assignNum(nList, tree, 0);
+      for (var k = 0; k < allOps.length; k++) {
+        var ops = allOps[k];
+        var nOps = [];
+        for (var l = 0; l < ops.length; l++) {
+          nOps.push(ops[l]);
+        }
+        assignOp(nOps, tree, 0);
+        var resultValue = calculate(tree);
+        if (resultValue == Number(document.getElementById("target").value)) {
+          output.push(printNode(tree));
+          return;
+        }
+      }
+    }
+  }
+};
+
+var assignNum = function (nList, nNode, pos) {
+  if (nNode == null) return;
+  assignNum(nList, nNode.right, pos + 1);
+  if (nNode.left == null && nNode.right == null) {
+    nNode.v = nList.shift();
+  }
+  assignNum(nList, nNode.left, pos + 1);
+};
+
+var assignOp = function (nOps, nNode, pos) {
+  if (nNode == null) return;
+  assignOp(nOps, nNode.right, pos + 1);
+  if (nNode.left != null || nNode.right != null) {
+    nNode.op = nOps.shift();
+  }
+  assignOp(nOps, nNode.left, pos + 1);
+};
+
+var generateCombinations = function (left, right) {
+  var list = [];
+  for (var i = 0; i < left.length; i++) {
+    for (var j = 0; j < right.length; j++) {
+      var nNode = new Node(0, 0);
+      nNode.left = cloneNode(left[i]);
+      nNode.right = cloneNode(right[j]);
+      list.push(nNode);
+    }
+  }
+  return list;
+};
+
+var solve = function() {
+  nums = document.getElementById("nums").value.toLowerCase().split(" ");
+  for (var i = 0; i < nums.length; i++) {
+    switch (nums[i]) {
+      case 't': nums[i] = 10; break;
+      case 'j': nums[i] = 11; break;
+      case 'q': nums[i] = 12; break;
+      case 'k': nums[i] = 13; break;
+      case 'a': nums[i] = 1; break;
+      default: nums[i] = Number(nums[i]);
+    }
+  }
+  init();
+  createTrees();
+  var t = output.join("<br/>");
+  if (output.length == 0) t = "No Answer!";
+  document.getElementById("result").innerHTML = t;
+};
+</script>
+</head>
+<body>
+<h1>Twenty-four Game</h1>
+Note: Please use Chrome, not Firefox to ensure the speed.
+<p>
+Numbers (space-separated): <input type="text" id="nums" value="5 5 5 1"/><br/>
+Target (24, 219, etc.): <input type="text" id="target" value="24"/><br/>
+<input type="button" value="Solve!" onclick="solve();"/>
+</p>
+<div id="result"></div>
+<hr/>
+Powered by CAQ, Oct 2015
+</body>
+</html>
