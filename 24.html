@@ -202,14 +202,46 @@ var solve = function() {
   if (output.length == 0) t = "No Answer!";
   document.getElementById("result").innerHTML = t;
 };
+
+// http://bost.ocks.org/mike/shuffle/
+function shuffle(array) {
+  var m = array.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
+}
+
+var generate = function(n) {
+  var arr = [];
+  for (var i = 0; i < 52; i++) {
+    arr.push(i);
+  }
+  shuffle(arr);
+  result = [];
+  for (var i = 0; i < n; i++) {
+    result.push(arr[i] % 13 + 1);
+  }
+  document.getElementById("nums").value = result.join(" ");
+};
 </script>
 </head>
 <body>
 <h1>Twenty-four Game</h1>
 Note: Please use Chrome, not Firefox to ensure the speed.
 <p>
-Numbers (space-separated): <input type="text" id="nums" value="5 5 5 1"/><br/>
-Target (24, 219, etc.): <input type="text" id="target" value="24"/><br/>
+Numbers (space-separated): <input type="text" id="nums" value="5 5 5 1 1 1"/> <input type="button" value="Random 6" onclick="generate(6);"/><br/>
+Target (24, 219, etc.): <input type="text" id="target" value="219"/><br/>
 <input type="button" value="Solve!" onclick="solve();"/>
 </p>
 <div id="result"></div>
