@@ -200,6 +200,10 @@ var solve = function() {
   createTrees();
   var t = output.join("<br/>");
   if (output.length == 0) t = "No Answer!";
+  return t;
+};
+
+var displaySolve = function(t) {
   document.getElementById("result").innerHTML = t;
 };
 
@@ -234,15 +238,23 @@ var generate = function(n) {
   }
   document.getElementById("nums").value = result.join(" ");
 };
+
+var answer = "";
+var stepSolve = function() {
+  var n = document.getElementById("result").innerHTML.length;
+  if (n == 0) answer = solve();
+  document.getElementById("result").innerHTML = answer.substring(0, n + 1);
+};
+
 </script>
 </head>
 <body>
 <h1>Twenty-four Game</h1>
 Note: Please use Chrome, not Firefox to ensure the speed.
 <p>
-Numbers (space-separated): <input type="text" id="nums" value="5 5 5 1 1 1"/> <input type="button" value="Random 6" onclick="generate(6);"/><br/>
+Numbers (space-separated): <input type="text" id="nums" value="1 2 3 4 5 6" onchange=/> <input type="button" value="Random 6" onclick="generate(6);"/><br/>
 Target (24, 219, etc.): <input type="text" id="target" value="219"/><br/>
-<input type="button" value="Solve!" onclick="solve();"/>
+<input type="button" value="Solve!" onclick="displaySolve(solve());"/> <input type="button" value="Step" onclick="stepSolve(0);"/> <input type="button" value="Clear" onclick="displaySolve('');"/>
 </p>
 <div id="result"></div>
 <hr/>
